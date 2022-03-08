@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import { isValidUrl } from '../../../../util/util';
+import { isValidUrl, filterImageFromURL, deleteLocalFiles } from '../../../../util/util';
 //import * as AWS from '../../../../aws';
 
 const router: Router = Router();
@@ -35,7 +35,12 @@ router.get('/', async(request : Request, response : Response) => {
         return response.status(400).send({message : 'Image url is not a valid url.'});
     }
 
-    response.send('TODO: filter image');
+    const image_path = await filterImageFromURL(image_url);
+
+    response.on('finish', async () => { 
+        await deleteLocalFiles([image_path]); 
+    }).
+    status(200).sendFile(image_path);
 });
 
 export const FilteredImageRouter: Router = router;
