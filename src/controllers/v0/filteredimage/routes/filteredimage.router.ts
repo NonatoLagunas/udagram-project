@@ -35,12 +35,21 @@ router.get('/', async(request : Request, response : Response) => {
         return response.status(400).send({message : 'Image url is not a valid url.'});
     }
 
-    const image_path = await filterImageFromURL(image_url);
-
-    response.on('finish', async () => { 
-        await deleteLocalFiles([image_path]); 
-    }).
-    status(200).sendFile(image_path);
+    var image_path : string = "";
+    try{
+        image_path = await filterImageFromURL(image_url);
+    }
+    catch
+    {
+        return response.status(422).send({message : 'Image url cannot be processed.'})
+    }
+    finally
+    {
+        response.on('finish', async () => { 
+            await deleteLocalFiles([image_path]); 
+        }).
+        status(200).sendFile(image_path);
+    }
 });
 
 export const FilteredImageRouter: Router = router;
